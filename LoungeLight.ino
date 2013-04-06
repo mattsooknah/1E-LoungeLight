@@ -64,17 +64,20 @@ void loop() {
   
   //rgb_explode(10);
   //betterStripes(Color(50,200,0),Color(0,50,200),Color(200,0,50),05,5,1000);
-  rainbowStripes(05,5,1000);
+  
+  int stdel = 05; 
+  
+  rainbowStripes(stdel/5,5,1000);
    
   wipe();
    
   int i;
-  for (i=0;i<3;i++) {
-    disperse(05, strip.numPixels() / 2);
+  for (i=0;i<5;i++) {
+    disperse(stdel/5, strip.numPixels() / 2);
   }
   
-  pulseBounce(05);
-  rainbow(05);
+  //pulseBounce(05);
+  rainbow(stdel/2);
   interpolate_matrix(255, 0, 0, 0, 255, 0, 192, 50);
   interpolate_matrix(0, 255, 0, 0, 0, 255, 192, 50);
   interpolate_matrix(0, 0, 255, 255, 0, 0, 192, 50);
@@ -84,7 +87,7 @@ void loop() {
   colorWipe(Color(255, 0, 0), 10);
   colorWipe(Color(0, 255, 0), 10);
   colorWipe(Color(0, 0, 255), 10);
-  rainbowCycle(05);
+  rainbowCycle(stdel/2);
 }
 
 /*
@@ -193,12 +196,16 @@ void stripes(uint8_t wait, int n) {
 
 void disperse(uint8_t wait, int s) {
   int center, i;
-  
+
   for (i=0; i<s/2; i++) {
     for (center=s-1; center < strip.numPixels(); center = center + s) {
       strip.setPixelColor(center+i, Wheel(center % 255));
       strip.setPixelColor(center-i, Wheel(center % 255));
     }
+    
+    // take care of boundary condition at beginning of strip
+    strip.setPixelColor(i, Wheel(0));
+    
     strip.show();
     delay(wait);
   }
@@ -208,6 +215,10 @@ void disperse(uint8_t wait, int s) {
       strip.setPixelColor(center+i, Color(0,0,0));
       strip.setPixelColor(center-i, Color(0,0,0));
     }
+    
+    // take care of boundary condition at beginning of strip
+    strip.setPixelColor(i, Color(0,0,0));
+    
     strip.show();
     delay(wait);
   }
@@ -324,6 +335,7 @@ void rainbow(uint8_t wait) {
 // along the chain
 void rainbowCycle(uint8_t wait) {
   int i, j;
+  int corr = floor(255/strip.numPixels());
   
   for (j=0; j < 256 * 5; j++) {     // 5 cycles of all 25 colors in the wheel
     for (i=0; i < strip.numPixels(); i++) {
@@ -331,7 +343,7 @@ void rainbowCycle(uint8_t wait) {
       // (thats the i / strip.numPixels() part)
       // Then add in j which makes the colors go around per pixel
       // the % 96 is to make the wheel cycle around
-      strip.setPixelColor(i, Wheel( ((i * 256 / strip.numPixels()) + j) % 256) );
+      strip.setPixelColor(i, Wheel( ((i * 256 * corr / strip.numPixels()) + j) % 256) );
     }  
     strip.show();   // write all the pixels out
     delay(wait);
